@@ -100,7 +100,7 @@ def get_sheets():
 
 @app.route("/hackaton/read_screenshot", methods=['POST'])
 def read_screenshot():
-    ocr_apikey = 'K81619200388957'
+    ocr_apikey = 'TODO'
     data = request.get_json()
     base64img = data.get("screenshot")
     endpoint = 'https://api.ocr.space/parse/image'
