@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackTheData</title>
+    <link rel="icon" href="https://i.ibb.co/DDmV2ZbB/imagem-2025-07-02-151306056-removebg-preview.png" type="image/png">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Contêiner para o Iframe */
+        .powerbi-container {
+            flex-grow: 1; 
+            overflow: hidden;
+            position: relative; /* Essencial para o posicionamento do logo */
+        }
+        
+        iframe {
+            position: absolute;
+            top: 0;
+            border: none;
+            
+            /* Lógica para deslocamento: */
+            width: 110%;      /* Aumenta a largura em 10% */
+            left: -9.8%;       /* Desloca 10% para a esquerda */
+
+            /* Mantém a correção para a barra inferior */
+            height: calc(100% + 38px); 
+        }
+
+        /* --- ESTILO ADICIONADO PARA O LOGO --- */
+        .logo-overlay {
+            position: absolute; /* Posicionamento absoluto em relação ao pai (.powerbi-container) */
+            top: 20px;          /* Distância do topo */
+            right: 20px;         /* Distância da direita */
+            width: 120px;       /* Largura do logo (ajuste se necessário) */
+            height: auto;       /* Altura automática para manter proporção */
+            z-index: 10;        /* Garante que o logo fique na frente do iframe */
+        }
+        /* --- FIM DO ESTILO DO LOGO --- */
+
+        .controls {
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            gap: 15px; 
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #0078d4;
+            background-color: #0078d4;
+            color: white;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
+        #status {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+ <!--   <div class="controls">        
+        <button onclick="takeScreenshotAndSend()">SALVAR DADOS</button>
+        <span id="status"></span>
+    </div>--!>
+
+<!-- CONTÊINER EM VOLTA DO IFRAME -->
+<div class="powerbi-container">
+    <iframe title="Hackaton_02-07-PHC" src="https://app.powerbi.com/view?r=eyJrIjoiMWYxMzRkODAtOWViOS00OTAzLThjOTEtYWEwZDMxZDFiZjkwIiwidCI6ImIwZmQ4YTc3LThhY2YtNDUxZi05ZDc5LTY2YmI2MmNhMDQwZCJ9&pageName=e7f7d2ea9d658e057947&rs:embed=true" frameborder="0" allowFullScreen="true"></iframe>
+    
+    <!-- IMAGEM DO LOGO ADICIONADA AQUI DENTRO -->
+    <img src="https://i.ibb.co/DDmV2ZbB/imagem-2025-07-02-151306056-removebg-preview.png" alt="Logo HackTheData" class="logo-overlay">
+</div>
+<!-- FIM DO CONTÊINER -->
+
+<script>
+    // Seu script JavaScript permanece o mesmo
+    async function takeScreenshotAndSend() {
+        const statusEl = document.getElementById('status');
+        const endpoint = 'https://rolezeiro.pythonanywhere.com/hackaton/read_screenshot';
+        const displayMediaOptions = { video: { displaySurface: "browser", }, audio: false, preferCurrentTab: true, selfBrowserSurface: "include", systemAudio: "exclude", surfaceSwitching: "exclude", monitorTypeSurfaces: "exclude", };
+        let stream = null;
+        try {
+            statusEl.textContent = "Aguardando permissão para capturar os dados...";
+            stream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+            const track = stream.getVideoTracks()[0];
+            const imageCapture = new ImageCapture(track);
+            const bitmap = await imageCapture.grabFrame();
+            track.stop(); 
+            const canvas = document.createElement('canvas');
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+            const context = canvas.getContext('2d');
+            context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+            const dataUrl = canvas.toDataURL('image/png');
+            const payload = { screenshot: dataUrl };
+            statusEl.textContent = "Enviando dados para o servidor...";
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', },
+                body: JSON.stringify(payload),
+            });
+            if (response.ok) {
+                const result = await response.json(); 
+                console.log('Sucesso:', result);
+                statusEl.textContent = "Dados enviados com sucesso!";
+            } else {
+                throw new Error(`Erro no servidor: ${response.status} ${response.statusText}`);
+            }
+        } catch (err) {
+            console.error("Erro no processo de captura ou envio:", err);
+            statusEl.textContent = `Falha ao capturar os dados, verifique se está na página correta`;
+            if (err.name === 'NotAllowedError') {
+                 statusEl.textContent = "A permissão para capturar os dados foi negada.";
+            }
+        } finally {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
