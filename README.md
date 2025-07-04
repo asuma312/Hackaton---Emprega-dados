@@ -196,7 +196,6 @@ Recebe imagem base64, extrai metas da campanha via OCR.
 ├── sharepoint.py          # Download de arquivo Excel do SharePoint
 ├── config.py              # Configurações gerais
 ├── credentials_sheets.json # Credenciais Google (local)
-├── metas_historico.csv    # Metas extraídas de imagens
 └── requirements.txt       # Dependências do projeto
 ```
 
