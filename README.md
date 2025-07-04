@@ -85,21 +85,7 @@ source venv/bin/activate
 
 ### 3. Instale as dependências
 
-Crie um arquivo `requirements.txt` com:
-
-```
-Flask
-Flask-Cors
-pandas
-google-api-python-client
-google-auth-oauthlib
-google-auth-httplib2
-requests
-cloudscraper
-openpyxl
-```
-
-E instale:
+Instale:
 
 ```bash
 pip install -r requirements.txt
